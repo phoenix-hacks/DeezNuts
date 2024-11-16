@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h3, h2 {
+      color: #333;
+    }
+
+    .doctor-info {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .doctor-info img {
+      margin-top: 10px;
+      width: 100px;
+      height: auto;
+      border-radius: 50%;
+    }
+
+    .doctor-info p {
+      margin: 5px 0;
+    }
+
+    .appointment-info {
+      margin-top: 20px;
+    }
+
+    .appointment-info p {
+      margin: 10px 0;
+    }
+
+    .thanks {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Appointment Confirmation</h1>
+  </header>
+
+  <div class="container">
+    <h2>Thank you for booking an appointment!</h2>
+    <div class="doctor-info">
+      <h3>Doctor Details:</h3>
+      <p><strong>Name:</strong> {{ doctor.name }}</p>
+      <p><strong>Specialty:</strong> {{ doctor.specialty }}</p>
+      <img src="{{ url_for('static', filename='images/' + doctor.photo) }}" alt="{{ doctor.name }}">
+      <p><strong>Address:</strong> {{ doctor.address }}</p>
+    </div>
+
+    <div class="appointment-info">
+      <h3>Queue Information:</h3>
+      <p><strong>Number of patients ahead:</strong> {{ patients_ahead }}</p>
+      <p><strong>Estimated waiting time:</strong> {{ total_time }} minutes</p>
+      <h3>Consultation Fee:</h3>
+      <p><strong>₹</strong>{{ total_fee_inr }}</p>
+    </div>
+
+    <div class="thanks">
+      <p>Thank you for choosing our service!</p>
+    </div>
+  </div>
+</body>
+</html>

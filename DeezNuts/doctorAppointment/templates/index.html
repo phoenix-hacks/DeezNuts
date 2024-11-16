@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Appointment Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h3 {
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select, button {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .queue-info {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .queue-info p {
+      margin: 10px 0;
+    }
+
+    img {
+      margin-top: 10px;
+      width: 100px;
+      height: auto;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Doctor Appointment Booking</h1>
+  </header>
+
+  <div class="container">
+    <h1>Book an Appointment</h1>
+    <form id="appointment-form">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required placeholder="Enter your name">
+
+      <label for="phone">Phone Number:</label>
+      <input type="text" id="phone" name="phone" maxlength="10" required placeholder="Enter your phone number (e.g., 1234567890)">
+
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" required placeholder="Enter your age" min="1">
+
+      <label for="disease">Select Disease:</label>
+      <select id="disease" name="disease" required>
+        <option value="">-- Select a Disease --</option>
+        <option value="fever">Fever</option>
+        <option value="diabetes">Diabetes</option>
+        <option value="sore_throat">Sore Throat</option>
+      </select>
+
+      <label for="doctor">Select Doctor:</label>
+      <select id="doctor" name="doctor" required>
+        <option value="">-- Select a Doctor --</option>
+      </select>
+      
+      <button type="submit">Book Appointment</button>
+    </form>
+
+    <div class="queue-info" id="queue-info" style="display: none;">
+      <h3>Queue Information</h3>
+      <p>Number of patients ahead: <span id="patients-ahead">0</span></p>
+      <p>Estimated waiting time: <span id="estimated-time">0 minutes</span></p>
+      <p>Consultation Fee: ₹<span id="consultation-fee">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    const diseaseSelect = document.getElementById("disease");
+    const doctorSelect = document.getElementById("doctor");
+    const queueInfo = document.getElementById("queue-info");
+    const patientsAheadSpan = document.getElementById("patients-ahead");
+    const estimatedTimeSpan = document.getElementById("estimated-time");
+    const consultationFeeSpan = document.getElementById("consultation-fee");
+
+    diseaseSelect.addEventListener("change", async () => {
+      const disease = diseaseSelect.value;
+
+      if (disease) {
+        const response = await fetch("/get_doctors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disease })
+        });
+        const doctors = await response.json();
+
+        doctorSelect.innerHTML = '<option value="">-- Select a Doctor --</option>';
+        doctors.forEach((doctor) => {
+          const option = document.createElement("option");
+          option.value = doctor.name;
+          option.textContent = `${doctor.name} - ${doctor.specialty}`;
+          doctorSelect.appendChild(option);
+        });
+      }
+    });
+
+    doctorSelect.addEventListener("change", async () => {
+      const disease = diseaseSelect.value;
+      const doctorName = doctorSelect.value;
+
+      if (disease && doctorName) {
+        const response = await fetch("/calculate_fees", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            disease,
+            doctor_name: doctorName
+          })
+        });
+        const { patients_ahead, total_time, total_fee_inr } = await response.json();
+
+        queueInfo.style.display = "block";
+        patientsAheadSpan.textContent = patients_ahead;
+        estimatedTimeSpan.textContent = `${total_time} minutes`;
+        consultationFeeSpan.textContent = total_fee_inr;
+      }
+    });
+
+    // Handle the form submission
+    document.getElementById("appointment-form").addEventListener("submit", async (event) => {
+      event.preventDefault();  // Prevent the default form submission
+
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const age = document.getElementById("age").value;
+      const disease = diseaseSelect.value;
+      const doctor = doctorSelect.value;
+
+      if (!name || !phone || !age || !disease || !doctor) {
+        alert("Please fill in all the fields.");
+        return;
+      }
+
+      // Validate the phone number
+      if (phone.length !== 10 || isNaN(phone)) {
+        alert("Please enter a valid phone number with exactly 10 digits.");
+        return;
+      }
+
+      // Validate the age to ensure it is not negative
+      if (age <= 0) {
+        alert("Age must be a positive number.");
+        return;
+      }
+
+      // Send the form data to the server
+      const response = await fetch("/book_appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, age, disease, doctor })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Appointment booked successfully!");
+      } else {
+        alert("Error booking appointment: " + result.error);
+      }
+    });
+  </script>
+</body>
+</html>
