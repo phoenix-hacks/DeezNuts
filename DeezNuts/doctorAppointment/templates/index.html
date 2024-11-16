@@ -76,6 +76,12 @@
       height: auto;
       border-radius: 50%;
     }
+
+    .disease-icon {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -98,9 +104,9 @@
       <label for="disease">Select Disease:</label>
       <select id="disease" name="disease" required>
         <option value="">-- Select a Disease --</option>
-        <option value="fever">Fever</option>
-        <option value="diabetes">Diabetes</option>
-        <option value="sore_throat">Sore Throat</option>
+        <option value="fever">Fever <img src="/static/images/fever_icon.png" class="disease-icon" alt="fever icon"></option>
+        <option value="diabetes">Diabetes <img src="/static/images/diabetes_icon.png" class="disease-icon" alt="diabetes icon"></option>
+        <option value="sore_throat">Sore Throat <img src="/static/images/sore_throat_icon.png" class="disease-icon" alt="sore throat icon"></option>
       </select>
 
       <label for="doctor">Select Doctor:</label>
